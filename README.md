@@ -65,6 +65,7 @@
 
 
 #### 总体逻辑说明
+[原型链接](https://fungchu.github.io/qingsongkaqoqin_app)
 ![引导页](https://github.com/fungchu/API_ML_AI/blob/master/image/%E5%BC%95%E5%AF%BC%E9%A1%B5.png?raw=true)
 
 - 主要有三个功能，从左到右分别是：考勤库、照相、用户；通过底部tab键的点击分别进行主要功能页面的跳转
@@ -130,6 +131,115 @@ graph LR
 - 选中【我的学生页面】和【选择班级页面】列表颜色降低灰度
 
 ## 3.API&AI
-1.所需的API：百度AI
+### 3.API使用水平
+[API技术框架](http://naotu.baidu.com/file/f5b34bbfcc9cc3be99b14cc9b6f3b598?token=3a597425f1ffbf95)
+
+![image](https://raw.githubusercontent.com/fungchu/API_ML_AI/master/image/%E4%BA%BA%E8%84%B8%E6%9F%A5%E6%89%BE%EF%BC%88%E5%AF%B9%E6%AF%94%E7%AD%9B%E9%80%89%EF%BC%89.png)
+
+---
+
+
+**所需的API：百度AI**
 [人脸库](http://ai.baidu.com/docs#/Face-Set/top)
 [人脸查找](http://ai.baidu.com/docs#/Face-Search/top)
+
+
+1. **人脸库-人脸注册**    [技术文档](https://ai.baidu.com/docs#/Face-Set-V3/top)
+
+- 作用：要完成1：N或者M：N识别，首先需要构建一个人脸库，用于存放所有人脸特征。
+- 接口描述：用于向人脸库中新增用户，及组内用户的人脸图片
+- 请求方法：POST
+- 接口地址：https://aip.baidubce.com/rest/2.0/face/v3/faceset
+
+**AipFace**
+```
+from aip import AipFace
+ 
+""" 你的 APPID AK SK """
+APP_ID = '你的 App ID'
+API_KEY = '你的 Api Key'
+SECRET_KEY = '你的 Secret Key'
+ 
+client = AipFace(APP_ID, API_KEY, SECRET_KEY)
+```
+**人脸注册**
+```
+uid = "user1"
+ 
+userInfo = "user's info"
+ 
+groupId = "group1,group2"
+ 
+""" 读取图片 """
+def get_file_content(filePath):
+    with open(filePath, 'rb') as fp:
+        return fp.read()
+ 
+image = get_file_content('example.jpg')
+ 
+""" 调用人脸注册 """
+client.addUser(uid, userInfo, groupId, image);
+ 
+""" 如果有可选参数 """
+options = {}
+options["action_type"] = "replace"
+ 
+""" 带参数调用人脸注册 """
+client.addUser(uid, userInfo, groupId, image, options)
+
+```
+2.人脸搜索
+[技术文档](https://ai.baidu.com/docs#/Face-Search-V3/4804d33e)
+
+- 作用：待识别的图片中，存在多张人脸的情况下，支持在一个人脸库中，一次请求，同时返回图片中所有人脸的识别结果。
+- 接口描述：待识别图片中含有多个人脸时，在指定人脸集合中，找到这多个人脸分别最相似的人脸
+- 请求方法：POST
+- 接口地址：https://aip.baidubce.com/rest/2.0/face/v3/multi-search
+
+```
+groupId = "group1,group2"
+ 
+""" 读取图片 """
+def get_file_content(filePath):
+    with open(filePath, 'rb') as fp:
+        return fp.read()
+ 
+image = get_file_content('example.jpg')
+ 
+""" 调用人脸识别 """
+client.identifyUser(groupId, image);
+ 
+""" 如果有可选参数 """
+options = {}
+options["ext_fields"] = "faceliveness"
+options["user_top_num"] = 3
+ 
+""" 带参数调用人脸识别 """
+client.identifyUser(groupId, image, options)
+```
+
+### 3.2 API使用比较分析
+#### 3.2.1 价格
+Face++
+![face++价格图](https://raw.githubusercontent.com/fungchu/API_ML_AI/master/image/face%2B%2B%E4%BB%B7%E6%A0%BC%E5%9B%BE.png)
+百度AI
+![百度ai价格图](https://raw.githubusercontent.com/fungchu/API_ML_AI/master/image/%E7%99%BE%E5%BA%A6%E4%BB%B7%E6%A0%BC%E5%9B%BE.png)
+对比分析
+
+平台 | 技术| 按量计费| 包时计费| 调用失败
+---|---|---|---|---
+ Face++|人脸识别| 调用+储存+调用失败|1000元/月/QPS   100元/月/QPS|计费
+百度AI |人脸识别| 免费|300元/月/QPS   30元/天/QPS|不计费
+在双方提供的服务数量相同的情况下，按照包月计费来看，face++在价格上远超百度AI；且按量计费和调用失败的收费上，百度AI的价格更加实惠。
+
+### 3.2 人工智能概率性
+![人工智能概率性](https://github.com/fungchu/API_ML_AI/blob/master/image/%E7%99%BE%E5%BA%A6AI%E9%94%99%E8%AF%AF%E8%AF%86%E5%88%AB%E7%8E%87.png?raw=true)
+
+
+---
+## Manlifest
+1. [产品功能结构图](https://github.com/fungchu/API_ML_AI/blob/master/image/%E5%8A%9F%E8%83%BD%E7%BB%93%E6%9E%84.png?raw=true)
+2. [原型链接](https://fungchu.github.io/qingsongkaqoqin_app)
+3. [API技术框架](http://naotu.baidu.com/file/f5b34bbfcc9cc3be99b14cc9b6f3b598?token=3a597425f1ffbf95)
+4. [人脸库](http://ai.baidu.com/docs#/Face-Set/top)
+5. [人脸查找](http://ai.baidu.com/docs#/Face-Search/top)
