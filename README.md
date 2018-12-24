@@ -152,40 +152,57 @@
 **AipFace**
 ```
 from aip import AipFace
- 
+
 """ 你的 APPID AK SK """
-APP_ID = '你的 App ID'
-API_KEY = '你的 Api Key'
-SECRET_KEY = '你的 Secret Key'
- 
-client = AipFace(APP_ID, API_KEY, SECRET_KEY)
+APP_ID = '15072858'
+API_KEY = 'a3Z3PWaqeNxvQRvAEzene57L'
+SECRET_KEY = 'ZdEzGQ5ayasuLrDdb6iIAyQmNUaAH07a'
+
+client = AipFace(APP_ID, API_KEY, SECRET_KEY)  
+
+#获取百度token（可以理解为密钥）
+def get_token(API_KEY, SECRET_KEY):
+    import requests
+    import json
+
+    payload = {
+        'grant_type': 'client_credentials', 
+        'client_id': '{}'.format(API_KEY),
+        'client_secret': '{}'.format(SECRET_KEY)
+    }
+
+    r = requests.post("https://aip.baidubce.com/oauth/2.0/token", data=payload)
+    
+    return (r.json()['access_token'])
 ```
 **人脸注册**
 ```
-uid = "user1"
- 
-userInfo = "user's info"
- 
-groupId = "group1,group2"
- 
-""" 读取图片 """
-def get_file_content(filePath):
-    with open(filePath, 'rb') as fp:
-        return fp.read()
- 
-image = get_file_content('example.jpg')
- 
-""" 调用人脸注册 """
-client.addUser(uid, userInfo, groupId, image);
- 
+#上传图片到人脸库
+image = "https://raw.githubusercontent.com/Tumaorou/face_search/master/yao_ming.jpg"
+
+imageType = "URL"
+
+groupId = "test_group"#用户组
+
+userId = "yao_ming"#用户名，一个用户可注册多张图片
+
 """ 如果有可选参数 """
 options = {}
-options["action_type"] = "replace"
- 
+options["user_info"] = "user's info"
+options["quality_control"] = "NONE"
+options["liveness_control"] = "LOW"
+
 """ 带参数调用人脸注册 """
-client.addUser(uid, userInfo, groupId, image, options)
+client.addUser(image, imageType, groupId, userId, options)
 
 ```
+> {'cached': 0,
+ 'error_code': 223105,
+ 'error_msg': 'face is already exist',
+ 'log_id': 744193254732205361,
+ 'result': None,
+ 'timestamp': 1545473220}
+ 
 2.人脸搜索
 [技术文档](https://ai.baidu.com/docs#/Face-Search-V3/4804d33e)
 
@@ -195,26 +212,64 @@ client.addUser(uid, userInfo, groupId, image, options)
 - 接口地址：https://aip.baidubce.com/rest/2.0/face/v3/multi-search
 
 ```
-groupId = "group1,group2"
- 
-""" 读取图片 """
-def get_file_content(filePath):
-    with open(filePath, 'rb') as fp:
-        return fp.read()
- 
-image = get_file_content('example.jpg')
- 
-""" 调用人脸识别 """
-client.identifyUser(groupId, image);
- 
-""" 如果有可选参数 """
-options = {}
-options["ext_fields"] = "faceliveness"
-options["user_top_num"] = 3
- 
-""" 带参数调用人脸识别 """
-client.identifyUser(groupId, image, options)
+#获取用户列表
+client.getGroupUsers(groupId)
 ```
+> {'cached': 0,
+ 'error_code': 0,
+ 'error_msg': 'SUCCESS',
+ 'log_id': 747956954732228941,
+ 'result': {'user_id_list': ['zhu_feng', 'yao_ming']},
+ 'timestamp': 1545473222}
+ 
+```
+#获取用户人脸列表
+client.faceGetlist('zhu_feng', groupId)
+```
+> {'cached': 0,
+ 'error_code': 0,
+ 'error_msg': 'SUCCESS',
+ 'log_id': 747956954732232601,
+ 'result': {'face_list': [{'ctime': '2018-12-16 13:53:02',
+    'face_token': 'a0995896f6773b08a3620ddd229d8344'}]},
+ 'timestamp': 1545473223}
+ 
+```
+#人脸搜索
+def search_face(API_KEY, SECRET_KEY, img_url):
+    import requests
+    import json
+    
+    access_token = str(get_token(API_KEY, SECRET_KEY))
+    
+    payload = {
+        'image': '{}'.format(img_url),
+        'image_type' : 'URL',
+        'group_id_list': 'test_group',#从指定的group中进行查找 用逗号分隔，上限10个
+        "max_face_num" : 5,#最多处理人脸的数目，默认值为1(仅检测图片中面积最大的那个人脸) 最大值10
+    }
+
+    r = requests.post('https://aip.baidubce.com/rest/2.0/face/v3/search?access_token='+ access_token, params=payload)
+
+    return (r.json())
+```
+
+```
+#填写需要查找的图片地址
+img_url = 'https://raw.githubusercontent.com/Tumaorou/face_search/master/group.jpg'
+ 
+search_face(API_KEY,SECRET_KEY,img_url)
+```
+> {'cached': 0,
+ 'error_code': 0,
+ 'error_msg': 'SUCCESS',
+ 'log_id': 747956954732241961,
+ 'result': {'face_token': '2ee12854f31f8c0700ea9aae8fbc940d',
+  'user_list': [{'group_id': 'test_group',
+    'score': 16.384712219238,
+    'user_id': 'yao_ming',
+    'user_info': "user's info"}]},
+ 'timestamp': 1545473224}
 
 ### 3.2 API使用比较分析
 #### 3.2.1 价格
@@ -228,7 +283,6 @@ Face++
 ---|---|---|---|---
  Face++|人脸识别| 调用+储存+调用失败|1000元/月/QPS   100元/月/QPS|计费
 百度AI |人脸识别| 免费|300元/月/QPS   30元/天/QPS|不计费
-
 在双方提供的服务数量相同的情况下，按照包月计费来看，face++在价格上远超百度AI；且按量计费和调用失败的收费上，百度AI的价格更加实惠。
 
 ### 3.2 人工智能概率性
