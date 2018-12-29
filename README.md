@@ -2,7 +2,7 @@
 | Target release  | 2018/11/15  |
 | ------------ |------------ |
 |  Epic | 刷脸考勤  |
-|  Document Status | 进行中   |
+|  Document Status | 已完成   |
 |  Document owner |  朱凤 |
 
 
@@ -154,9 +154,9 @@
 from aip import AipFace
 
 """ 你的 APPID AK SK """
-APP_ID = '15072858'
-API_KEY = 'a3Z3PWaqeNxvQRvAEzene57L'
-SECRET_KEY = 'ZdEzGQ5ayasuLrDdb6iIAyQmNUaAH07a'
+APP_ID = '*****58'
+API_KEY = 'a3Z3PWaqe******ene57L'
+SECRET_KEY = 'Zd******suLrDdb6iIAyQmNUaAH07a'
 
 client = AipFace(APP_ID, API_KEY, SECRET_KEY)  
 
