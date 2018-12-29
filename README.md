@@ -1,5 +1,5 @@
 # API_ML_AI
-| Target release  | 2018/11/15  |
+| Target release  | 2018/12/29  |
 | ------------ |------------ |
 |  Epic | 刷脸考勤  |
 |  Document Status | 已完成   |
